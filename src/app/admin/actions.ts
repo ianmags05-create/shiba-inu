@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createClient, isAdminEmail, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, isAdminEmail, isSupabaseConfigured } from "../../lib/supabase/server";
 
 export type LoginState = { error?: string } | undefined;
 
