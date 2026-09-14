@@ -2,7 +2,7 @@ import { createAdminClient } from "../../../lib/supabase/admin";
 import { requireAdmin } from "../../../lib/admin-auth";
 import { siteContentDefaults } from "../../../lib/site-content-defaults";
 import { homepageSections, mergeHomepageLayout } from "../../../lib/homepage-sections";
-import { imageSlots } from "../../../lib/image-slots";
+import { imageSlotDefaults, imageSlots } from "../../../lib/image-slots";
 import AdminShell from "../admin-shell";
 import { deleteContent, saveContent } from "../crud-actions";
 import HomepageEditor from "./homepage-editor";
@@ -28,11 +28,11 @@ export default async function ContentPage() {
   const visualSections = homepageSections.map((section) => ({
     ...section,
     fields: rows.filter((item) => item.section === section.label || (section.key === "hotel" && item.section === "Hotel")),
-    images: (section.imageSlots || []).map((slotKey) => ({ slotKey, label: slotLabels.get(slotKey) || slotKey, asset: images.get(slotKey) || null })),
+    images: (section.imageSlots || []).map((slotKey) => ({ slotKey, label: slotLabels.get(slotKey) || slotKey, asset: images.get(slotKey) || null, fallbackImage: imageSlotDefaults[slotKey] || section.fallbackImage })),
     previewImage: (section.imageSlots?.[0] && images.get(section.imageSlots[0])?.public_url) || section.fallbackImage,
   }));
 
-  return <AdminShell title="Website Content" email={user.email} active="/admin/content">
+  return <AdminShell title="Edit Homepage" email={user.email} active="/admin/pages">
     <div className={styles.notice}><strong>Visual homepage editor connected.</strong><span>Edit content and images, reorder or hide sections, and preview the homepage from one screen.</span></div>
     <HomepageEditor sections={visualSections} initialLayout={layout} />
     <details className={styles.advanced}>
