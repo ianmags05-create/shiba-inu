@@ -23,19 +23,17 @@ type ContentRow = {
 
 async function saveContentRow(row: ContentRow) {
   const db = createAdminClient();
-  const { data: existing, error: readError } = await db
+  const { data: updated, error: updateError } = await db
     .from("site_content")
-    .select("id")
+    .update(row)
     .eq("content_key", row.content_key)
-    .maybeSingle();
+    .select("id");
 
-  if (readError) throw new Error(readError.message);
+  if (updateError) throw new Error(updateError.message);
+  if (updated && updated.length > 0) return;
 
-  const { error } = existing
-    ? await db.from("site_content").update(row).eq("id", existing.id)
-    : await db.from("site_content").insert(row);
-
-  if (error) throw new Error(error.message);
+  const { error: insertError } = await db.from("site_content").insert(row);
+  if (insertError) throw new Error(insertError.message);
 }
 
 export async function saveContent(fd:FormData){ await requireAdmin(); const row={content_key:text(fd,"content_key"),label:text(fd,"label"),section:text(fd,"section")||"General",value:text(fd,"value"),content_type:text(fd,"content_type")||"text",sort_order:Number(fd.get("sort_order")||0),published:fd.get("published")==="on",updated_at:new Date().toISOString()}; if(!row.content_key||!row.label) return; await saveContentRow(row);refresh(); }
