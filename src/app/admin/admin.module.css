@@ -423,6 +423,9 @@
 .inlineField input, .inlineField textarea { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #dfd5c7; border-radius: 7px; background: #fff; color: var(--text); font: inherit; }
 .inlineField textarea { min-height: 76px; resize: vertical; }
 .inlineField button { min-height: 42px; padding: 8px 13px; border: 1px solid var(--green2); border-radius: 7px; background: #fff; color: var(--green2); font-weight: 750; cursor: pointer; }
+.saveSuccess, .saveError { grid-column: 1 / -1; font-size: 12px; font-weight: 750; }
+.saveSuccess { color: var(--green); }
+.saveError { color: #a12b2b; }
 .previewJump { margin-top: 12px; background: #fff; color: var(--green2); }
 .livePreview { position: sticky; top: 14px; overflow: hidden; border: 1px solid #d9cdbd; border-radius: 13px; background: #fff; box-shadow: 0 14px 38px rgba(18, 63, 61, 0.1); }
 .livePreview > div { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); color: var(--green); }
