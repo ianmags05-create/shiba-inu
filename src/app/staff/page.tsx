@@ -10,7 +10,12 @@ export default async function StaffDashboard({ searchParams }: { searchParams: P
   let query = db.from("staff_records").select("id,record_type,customer_name,pet_name,updated_at,updated_by").order("updated_at",{ascending:false}).limit(500);
   if (params.record_type === "agreement" || params.record_type === "checklist") query = query.eq("record_type", params.record_type);
   if (params.record_search?.trim()) { const q = params.record_search.trim().replace(/[%_,()]/g, ""); query = /^\d+$/.test(q) ? query.eq("id",q) : query.or(`customer_name.ilike.%${q}%,pet_name.ilike.%${q}%`); }
-  const { data: records, error } = await query; if (error) throw new Error(error.message);
+  const { data: records, error } = await query;
+  if (error) {
+    const name = profile.full_name || profile.email || "Staff";
+    const missingSchema = error.code === "42P01" || error.code === "PGRST205" || error.message.toLowerCase().includes("staff_records");
+    return <StaffShell name={name} active="/staff"><section className={styles.card}><div className={styles.title}><div><span className={styles.kicker}>Setup required</span><h2>Staff records database</h2></div></div><div className={`${styles.notice} ${styles.error}`} role="alert">{missingSchema ? <>The staff portal database has not been installed yet. Run the latest <strong>supabase/phase-2-staff-portal.sql</strong> file in Supabase SQL Editor, then reload this page.</> : <>The staff records database could not be reached. Check the Supabase server environment variables and Hostinger runtime logs. Error: {error.message}</>}</div></section></StaffShell>;
+  }
   const userIds = [...new Set((records || []).map(r=>r.updated_by).filter(Boolean))];
   const { data: users } = userIds.length ? await db.from("app_users").select("id,full_name,email").in("id",userIds) : {data:[]};
   const names = Object.fromEntries((users || []).map(u=>[u.id,u.full_name || u.email || "Unknown"]));
