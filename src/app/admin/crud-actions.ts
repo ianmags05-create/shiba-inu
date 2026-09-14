@@ -4,12 +4,36 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "../../lib/supabase/admin";
 import { requireAdmin } from "../../lib/admin-auth";
+import { homepageSections } from "../../lib/homepage-sections";
+import { z } from "zod";
 
 const text = (fd:FormData,key:string) => String(fd.get(key)||"").trim();
 const refresh = () => { revalidatePath("/admin"); revalidatePath("/", "page"); };
 
 export async function saveContent(fd:FormData){ await requireAdmin(); const db=createAdminClient(); const id=text(fd,"id"); const row={content_key:text(fd,"content_key"),label:text(fd,"label"),section:text(fd,"section")||"General",value:text(fd,"value"),content_type:text(fd,"content_type")||"text",sort_order:Number(fd.get("sort_order")||0),published:fd.get("published")==="on",updated_at:new Date().toISOString()}; if(!row.content_key||!row.label) return; const q=id?db.from("site_content").update(row).eq("id",id):db.from("site_content").insert(row); const {error}=await q;if(error)throw new Error(error.message);refresh(); }
 export async function deleteContent(fd:FormData){await requireAdmin();const {error}=await createAdminClient().from("site_content").delete().eq("id",text(fd,"id"));if(error)throw new Error(error.message);refresh();}
+
+const homepageLayoutSchema = z.array(z.object({ key: z.string(), visible: z.boolean() }));
+export async function saveHomepageLayout(input: unknown) {
+  await requireAdmin();
+  const parsed = homepageLayoutSchema.parse(input);
+  const allowed = new Set(homepageSections.map((section) => section.key));
+  if (parsed.length !== allowed.size || new Set(parsed.map((item) => item.key)).size !== allowed.size || parsed.some((item) => !allowed.has(item.key))) {
+    throw new Error("The homepage layout is incomplete or invalid.");
+  }
+  const { error } = await createAdminClient().from("site_content").upsert({
+    content_key: "homepage.layout",
+    label: "Homepage section layout",
+    section: "Homepage Layout",
+    value: JSON.stringify(parsed),
+    content_type: "textarea",
+    sort_order: -1,
+    published: true,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "content_key" });
+  if (error) throw new Error(error.message);
+  refresh();
+}
 
 export async function saveMenu(fd:FormData){await requireAdmin();const db=createAdminClient();const id=text(fd,"id");const row={label:text(fd,"label"),url:text(fd,"url"),sort_order:Number(fd.get("sort_order")||0),visible:fd.get("visible")==="on",updated_at:new Date().toISOString()};if(!row.label||!row.url)return;const q=id?db.from("menu_items").update(row).eq("id",id):db.from("menu_items").insert(row);const {error}=await q;if(error)throw new Error(error.message);refresh();}
 export async function deleteMenu(fd:FormData){await requireAdmin();const {error}=await createAdminClient().from("menu_items").delete().eq("id",text(fd,"id"));if(error)throw new Error(error.message);refresh();}
