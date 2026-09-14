@@ -1,2 +1,16 @@
-import { createAdminClient } from "../../../lib/supabase/admin";import { requireAdmin } from "../../../lib/admin-auth";import AdminShell from "../admin-shell";import { deleteMenu,saveMenu } from "../crud-actions";import styles from "../admin.module.css";export const dynamic="force-dynamic";
-export default async function MenusPage(){const user=await requireAdmin();const {data=[]}=await createAdminClient().from("menu_items").select("*").order("sort_order");return <AdminShell title="Navigation Menus" email={user.email} active="/admin/menus"><div className={styles.toolbar}><p>Add, reorder, hide, or change navigation links.</p></div><section className={styles.formCard}><form action={saveMenu}><label>Label<input name="label" required/></label><label>URL<input name="url" placeholder="#section or /page" required/></label><label>Order<input name="sort_order" type="number" defaultValue="0"/></label><label className={styles.check}><input name="visible" type="checkbox" defaultChecked/>Visible</label><button>Add menu item</button></form></section><div className={styles.grid}>{(data||[]).map(item=><article className={styles.row} key={item.id}><form action={saveMenu}><input type="hidden" name="id" value={item.id}/><label>Label<input name="label" defaultValue={item.label}/></label><label>URL<input name="url" defaultValue={item.url}/></label><label>Order<input name="sort_order" type="number" defaultValue={item.sort_order}/></label><label className={styles.check}><input name="visible" type="checkbox" defaultChecked={item.visible}/>Visible</label><button>Save</button><button className={styles.danger} formAction={deleteMenu}>Delete</button></form></article>)}</div></AdminShell>}
+import { createAdminClient } from "../../../lib/supabase/admin";
+import { requireAdmin } from "../../../lib/admin-auth";
+import AdminShell from "../admin-shell";
+import MenuEditor from "./menu-editor";
+import styles from "../admin.module.css";
+
+export const dynamic = "force-dynamic";
+
+export default async function MenusPage() {
+  const user = await requireAdmin();
+  const { data = [] } = await createAdminClient().from("menu_items").select("id,label,url,parent_id,sort_order,visible").order("sort_order");
+  return <AdminShell title="Navigation Menus" email={user.email} active="/admin/menus">
+    <div className={styles.notice}><strong>Build your main menu.</strong><span>Drag items to reorder, indent them as submenus, and expand an item to change its settings.</span></div>
+    <MenuEditor initialItems={data || []} />
+  </AdminShell>;
+}
