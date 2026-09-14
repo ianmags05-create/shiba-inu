@@ -2,7 +2,7 @@ import Link from "next/link";
 import { logout } from "./actions";
 import styles from "./admin.module.css";
 
-const items = [["Overview","/admin"],["Website Content","/admin/content"],["Menus","/admin/menus"],["Images","/admin/images"],["Staff Users","/admin/users"]];
+const items = [["Overview","/admin"],["Website Content","/admin/content"],["Menus","/admin/menus"],["Images","/admin/images"],["Staff Users","/admin/users"],["Open Staff Portal","/staff"]];
 
 export default function AdminShell({ title, email, active, children }: { title:string; email?:string; active:string; children:React.ReactNode }) {
   return <main className={styles.layout}><aside className={styles.sidebar}>
