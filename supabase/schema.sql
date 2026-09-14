@@ -22,6 +22,7 @@ create table if not exists public.menu_items (
   visible boolean not null default true,
   updated_at timestamptz not null default now()
 );
+create unique index if not exists menu_items_label_url_key on public.menu_items(label,url);
 
 create table if not exists public.media_assets (
   id uuid primary key default gen_random_uuid(),
@@ -78,8 +79,3 @@ on conflict (content_key) do nothing;
 insert into public.menu_items (label,url,sort_order) values
 ('Home','#top',10),('Services','#services',20),('Gallery','#gallery',30),('Team','#team',40),('Reviews','#reviews',50),('Contact us','#book',60)
 on conflict do nothing;
-
-insert into public.app_users (id,email,full_name,role,active)
-select id,email,coalesce(raw_user_meta_data->>'full_name','Owner'),'admin',true from auth.users
-where email='janmags09@gmail.com'
-on conflict (id) do update set role='admin',active=true;
