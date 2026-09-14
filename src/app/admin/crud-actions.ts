@@ -10,7 +10,35 @@ import { z } from "zod";
 const text = (fd:FormData,key:string) => String(fd.get(key)||"").trim();
 const refresh = () => { revalidatePath("/admin"); revalidatePath("/admin/content"); revalidatePath("/api/site-data"); revalidatePath("/", "page"); };
 
-export async function saveContent(fd:FormData){ await requireAdmin(); const db=createAdminClient(); const row={content_key:text(fd,"content_key"),label:text(fd,"label"),section:text(fd,"section")||"General",value:text(fd,"value"),content_type:text(fd,"content_type")||"text",sort_order:Number(fd.get("sort_order")||0),published:fd.get("published")==="on",updated_at:new Date().toISOString()}; if(!row.content_key||!row.label) return; const {error}=await db.from("site_content").upsert(row,{onConflict:"content_key"});if(error)throw new Error(error.message);refresh(); }
+type ContentRow = {
+  content_key: string;
+  label: string;
+  section: string;
+  value: string;
+  content_type: string;
+  sort_order: number;
+  published: boolean;
+  updated_at: string;
+};
+
+async function saveContentRow(row: ContentRow) {
+  const db = createAdminClient();
+  const { data: existing, error: readError } = await db
+    .from("site_content")
+    .select("id")
+    .eq("content_key", row.content_key)
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+
+  const { error } = existing
+    ? await db.from("site_content").update(row).eq("id", existing.id)
+    : await db.from("site_content").insert(row);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function saveContent(fd:FormData){ await requireAdmin(); const row={content_key:text(fd,"content_key"),label:text(fd,"label"),section:text(fd,"section")||"General",value:text(fd,"value"),content_type:text(fd,"content_type")||"text",sort_order:Number(fd.get("sort_order")||0),published:fd.get("published")==="on",updated_at:new Date().toISOString()}; if(!row.content_key||!row.label) return; await saveContentRow(row);refresh(); }
 export async function deleteContent(fd:FormData){await requireAdmin();const {error}=await createAdminClient().from("site_content").delete().eq("id",text(fd,"id"));if(error)throw new Error(error.message);refresh();}
 
 const homepageLayoutSchema = z.array(z.object({ key: z.string(), visible: z.boolean() }));
@@ -21,7 +49,7 @@ export async function saveHomepageLayout(input: unknown) {
   if (parsed.length !== allowed.size || new Set(parsed.map((item) => item.key)).size !== allowed.size || parsed.some((item) => !allowed.has(item.key))) {
     throw new Error("The homepage layout is incomplete or invalid.");
   }
-  const { error } = await createAdminClient().from("site_content").upsert({
+  await saveContentRow({
     content_key: "homepage.layout",
     label: "Homepage section layout",
     section: "Homepage Layout",
@@ -30,8 +58,7 @@ export async function saveHomepageLayout(input: unknown) {
     sort_order: -1,
     published: true,
     updated_at: new Date().toISOString(),
-  }, { onConflict: "content_key" });
-  if (error) throw new Error(error.message);
+  });
   refresh();
 }
 
