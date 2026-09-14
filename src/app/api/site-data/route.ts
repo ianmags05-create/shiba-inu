@@ -12,5 +12,5 @@ export async function GET() {
   ]);
   const content=Object.fromEntries((contentResult.data||[]).map(x=>[x.content_key,x.value]));
   const images=Object.fromEntries((imageResult.data||[]).map(x=>[x.slot_key,{url:x.public_url,alt:x.alt_text}]));
-  return Response.json({content,menu:menuResult.data||[],images},{headers:{"Cache-Control":"public, max-age=30, stale-while-revalidate=120"}});
+  return Response.json({content,menu:menuResult.data||[],images},{headers:{"Cache-Control":"no-store"}});
 }
