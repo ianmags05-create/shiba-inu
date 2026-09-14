@@ -315,7 +315,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <svg class="menu-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
 <svg class="menu-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
 </button>
-<nav class="nav-links" id="primary-menu" aria-label="Primary">
+<nav class="nav-links" id="primary-menu" aria-label="Primary" data-dynamic-menu>
 <a href="#top">Home</a>
 <div class="nav-item">
 <button class="services-toggle" type="button" aria-expanded="false" aria-controls="services-menu">Services <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 5 5 5-5"/></svg></button>
@@ -339,7 +339,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="wrap" data-divi="row">
 <div>
 <span class="eyebrow">24/7 pet hotel &middot; grooming &middot; puppies &middot; supplies &middot; Davao City</span>
-<h1>A home away from home for your <span>furbabies</span></h1>
+<h1 data-content-key="hero.title">A home away from home for your <span>furbabies</span></h1>
 <p class="lede">Air-conditioned rooms, CCTV access and someone on site every hour of every day. Drop off at dawn or midnight, we are open. Dogs from &#8369;900 a night, cats from &#8369;850.</p>
 <div class="hero-cta">
 <a class="btn btn-primary" href="#book">Contact us</a>
@@ -352,7 +352,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 </ul>
 </div>
 <div class="hero-art">
-<div class="hero-frame"><img class="ph" src="assets/photos/shiba-smile.webp" alt="A smiling Shiba Inu sitting on the shop counter"></div>
+<div class="hero-frame"><img class="ph" data-image-slot="hero.image" src="assets/photos/shiba-smile.webp" alt="A smiling Shiba Inu sitting on the shop counter"></div>
 <div class="pill-badge pb-1"><span class="ico" style="background:#FDEEDA"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#C2652A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-7.5-9.8A4.2 4.2 0 0 1 12 8.2a4.2 4.2 0 0 1 7.5 2.5c0 5.2-7.5 9.8-7.5 9.8Z"/></svg></span><span><b>24/7</b><small>reception never closes</small></span></div>
 <div class="pill-badge pb-2"><span class="ico" style="background:#E6F4F3"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#0D6560" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6.3 6.3l2.1 2.1M15.6 15.6l2.1 2.1M17.7 6.3l-2.1 2.1M8.4 15.6l-2.1 2.1"/><circle cx="12" cy="12" r="3.4"/></svg></span><span><b>Cat house</b><small>own CCTV access</small></span></div>
 </div>
@@ -370,7 +370,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="wrap" data-divi="row">
 <div class="sec-head center">
 <span class="eyebrow">What we do</span>
-<h2>Four ways we look after your pet</h2>
+<h2 data-content-key="services.title">Four ways we look after your pet</h2>
 <p>Puppies, boarding, grooming and supplies, all on one site at KM5 Buhangin.</p>
 </div>
 <div class="svc-grid">
@@ -414,7 +414,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="wrap" data-divi="row">
 <div class="sec-head center">
 <span class="eyebrow">Rates</span>
-<h2>Premium care, happy pets</h2>
+<h2 data-content-key="hotel.title">Premium care, happy pets</h2>
 <p>Every room is air-conditioned, cleaned daily and checked through the night. Prices are per pet, per night.</p>
 </div>
 <div class="suites" id="rates">
@@ -452,7 +452,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="wrap" data-divi="row">
 <div class="sec-head center">
 <span class="eyebrow">Grooming rates</span>
-<h2>Every service, every price, up front</h2>
+<h2 data-content-key="grooming.title">Every service, every price, up front</h2>
 <p>One pet at a time, never rushed. Prices are per pet and per visit.</p>
 </div>
 <div class="gcards">
@@ -539,11 +539,11 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <section data-divi="section" class="wrap" data-divi="row" id="gallery">
 <div class="sec-head center">
 <span class="eyebrow">Gallery</span>
-<h2>Have a look around the shop</h2>
+<h2 data-content-key="gallery.title">Have a look around the shop</h2>
 <p>The shop floor, the grooming room, the hotel and the team who run it.</p>
 </div>
 <div class="gal">
-<div><img class="ph" src="assets/photos/storefront.webp" alt="The Shiba Inu Pet Shop storefront" loading="lazy"></div>
+<div><img class="ph" data-image-slot="gallery.featured" src="assets/photos/storefront.webp" alt="The Shiba Inu Pet Shop storefront" loading="lazy"></div>
 <div><img class="ph" src="assets/photos/team-inside.webp" alt="The Shiba Inu Pet Shop team inside the store" loading="lazy"></div>
 <div><img class="ph" src="assets/photos/hotel-rooms.webp" alt="Air-conditioned rooms in the pet hotel" loading="lazy"></div>
 <div><img class="ph" src="assets/photos/grooming-area.webp" alt="The grooming area" loading="lazy"></div>
@@ -560,7 +560,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="story-art"><div class="story-frame"><img class="ph" src="assets/photos/shiba-kumi.webp" alt="Kumi, the Shiba Inu the business began with" loading="lazy"></div><span class="story-cap">Kumi, the reason all of this exists</span></div>
 <div class="story-body">
 <span class="eyebrow">Our story</span>
-<h2>It began with one Shiba Inu called Kumi</h2>
+<h2 data-content-key="story.title">It began with one Shiba Inu called Kumi</h2>
 <p>I always admired Shibas for being loyal, clever and stubbornly independent. When I finally found a breeder rehoming puppies, I fell for one of them on the spot and named her Kumi.</p>
 <p>A friend&rsquo;s success with breeding got me thinking, but I wanted to build something of my own. So I spent a long time researching how pet businesses run in Japan and Korea, and landed on an idea: breed one breed properly, and wrap a complete pet-care business around it.</p>
 <p>That is what this is. Not just somewhere to buy a puppy, but puppies, supplies, professional grooming and a 24 hour hotel in one place, so owners never have to worry about who is looking after their pet.</p>
@@ -574,7 +574,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="wrap" data-divi="row">
 <div class="sec-head center">
 <span class="eyebrow">The team</span>
-<h2>The people your pet will actually meet</h2>
+<h2 data-content-key="team.title">The people your pet will actually meet</h2>
 <p>Same faces every visit, in the shop, the grooming room and on the overnight desk.</p>
 </div>
 <div class="team-banner"><img class="ph" src="assets/photos/team-group.webp" alt="The Shiba Inu Pet Shop team outside the store" loading="lazy"></div>
@@ -592,7 +592,7 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="wrap" data-divi="row">
 <div class="sec-head center">
 <span class="eyebrow">Reviews</span>
-<h2>What owners tell us</h2>
+<h2 data-content-key="reviews.title">What owners tell us</h2>
 </div>
 <div class="quotes">
 <article class="quote">
@@ -618,9 +618,9 @@ body{font-size:16.5px}h1{font-size:clamp(36px,10vw,44px)}h2{font-size:clamp(29px
 <div class="cta">
 <div>
 <span class="eyebrow" style="color:var(--amber)">Enquiries only</span>
-<h2>Contact us or give us a ring</h2>
+<h2 data-content-key="contact.title">Contact us or give us a ring</h2>
 <p>There is no online booking here. Send us a message with your question and we will reply the same day. In a hurry? Ring us, someone is on the desk 24/7.</p>
-<a class="btn btn-line cta-tel" href="tel:+639554222664"><svg class="paw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4.5 5.5c0-1 .8-1.8 1.8-1.8h1.6c.8 0 1.5.6 1.7 1.4l.5 2.4c.2.8-.2 1.6-.9 2l-1.1.6a11.5 11.5 0 0 0 5.4 5.4l.6-1.1c.4-.7 1.2-1.1 2-.9l2.4.5c.8.2 1.4.9 1.4 1.7v1.6c0 1-.8 1.8-1.8 1.8A15.7 15.7 0 0 1 4.5 5.5Z"/></svg>Call 0955 422 2664</a>
+<a class="btn btn-line cta-tel" href="tel:+639554222664"><svg class="paw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4.5 5.5c0-1 .8-1.8 1.8-1.8h1.6c.8 0 1.5.6 1.7 1.4l.5 2.4c.2.8-.2 1.6-.9 2l-1.1.6a11.5 11.5 0 0 0 5.4 5.4l.6-1.1c.4-.7 1.2-1.1 2-.9l2.4.5c.8.2 1.4.9 1.4 1.7v1.6c0 1-.8 1.8-1.8 1.8A15.7 15.7 0 0 1 4.5 5.5Z"/></svg>Call <span data-content-key="contact.phone">0955 422 2664</span></a>
 <ul class="cta-notes"><li>KM5 Buhangin-Lapanday Rd, Buhangin, Davao City</li><li>Walk-ins welcome, any hour of the day</li></ul>
 </div>
 <form class="form" id="form" novalidate>
@@ -679,6 +679,16 @@ form.querySelectorAll('h3,.form-note,.field,button,small').forEach(function(el){
 document.getElementById('sent').classList.add('on')});
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -12% 0px',threshold:.08});
 document.querySelectorAll('.rv,.rv-pop').forEach(function(el){io.observe(el)});
+})();
+</script>
+<script>
+(function(){
+fetch('/api/site-data').then(function(r){return r.ok?r.json():Promise.reject()}).then(function(data){
+  Object.keys(data.content||{}).forEach(function(key){document.querySelectorAll('[data-content-key="'+key+'"]') .forEach(function(el){el.textContent=data.content[key]})});
+  var menu=document.querySelector('[data-dynamic-menu]');
+  if(menu&&data.menu&&data.menu.length){menu.innerHTML='';data.menu.forEach(function(item){if(!item.url||!/^(#|\/|https:\/\/)/.test(item.url))return;var a=document.createElement('a');a.textContent=item.label;a.href=item.url;if(item.url==='#book')a.className='btn btn-primary btn-sm';menu.appendChild(a)})}
+  Object.keys(data.images||{}).forEach(function(key){var image=data.images[key];document.querySelectorAll('[data-image-slot="'+key+'"]').forEach(function(el){if(/^https:\/\//.test(image.url)){el.src=image.url;el.alt=image.alt||el.alt}})});
+}).catch(function(){/* Static defaults remain visible if the CMS is unavailable. */});
 })();
 </script>
 </body>
