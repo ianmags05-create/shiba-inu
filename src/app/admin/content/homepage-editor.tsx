@@ -20,7 +20,7 @@ type ContentRow = {
 };
 
 type MediaAsset = { id: string; name: string; alt_text: string; public_url: string; storage_path: string; slot_key: string };
-type SectionImage = { slotKey: string; label: string; asset: MediaAsset | null };
+type SectionImage = { slotKey: string; label: string; asset: MediaAsset | null; fallbackImage: string };
 type EditorSection = HomepageSection & { fields: ContentRow[]; images: SectionImage[]; previewImage: string };
 
 function ContentFieldForm({ item }: { item: ContentRow }) {
@@ -152,7 +152,7 @@ export default function HomepageEditor({ sections, initialLayout }: { sections: 
                     <div><button type="submit">Save image</button><button className={styles.danger} type="submit" formAction={deleteImage}>Delete</button></div>
                   </form>
                 </article> : <article className={`${styles.sectionImageCard} ${styles.emptyImageCard}`} key={image.slotKey}>
-                  <div className={styles.imagePlaceholder}>No custom image</div>
+                  <div className={styles.currentImage}><img src={image.fallbackImage} alt={image.label} /><span>Current built-in image</span></div>
                   <form action={uploadImage}>
                     <input type="hidden" name="slot_key" value={image.slotKey} />
                     <label>{image.label}<input name="name" defaultValue={image.label} required /></label>
