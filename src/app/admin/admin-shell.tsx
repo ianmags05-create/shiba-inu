@@ -4,7 +4,7 @@ import styles from "./admin.module.css";
 
 const items = [
   ["Overview", "/admin", "◉"],
-  ["Website Content", "/admin/content", "▤"],
+  ["Pages", "/admin/pages", "▤"],
   ["Menus", "/admin/menus", "☰"],
   ["Staff Users", "/admin/users", "♙"],
   ["Staff Portal", "/staff", "↗"],
