@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash, randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -9,6 +10,9 @@ import { requireStaff } from "../../lib/staff-auth";
 
 export type StaffLoginState = { error?: string } | undefined;
 const text = (form: FormData, key: string) => String(form.get(key) || "").trim();
+const agreementFields = ["customer_name","phone","email","address","pet_name","pet_type","breed","color","age","weight","special_needs","additional_notes","liability_limit","signer_name","signed_date"];
+const checklistFields = ["pet_name","breed","room","checkin_date","checkin_time","checkout_date","checkout_time","special_instructions","customer_name","signer_name","signed_date"];
+const dailyFields = ["date","time","morning_food","afternoon_food","evening_food","snack","fresh_water","vitamins","potty_time","room_clean","room_sanitation","staff_assisted"];
 
 export async function staffLogin(_state: StaffLoginState, form: FormData): Promise<StaffLoginState> {
   if (!isSupabaseConfigured()) return { error: "The database connection is not configured." };
@@ -20,7 +24,7 @@ export async function staffLogin(_state: StaffLoginState, form: FormData): Promi
   const { data: profile } = await createAdminClient().from("app_users").select("active").eq("id", data.user.id).maybeSingle();
   if (!profile?.active && !(process.env.ADMIN_EMAILS || "").toLowerCase().split(",").includes(parsed.data.email.toLowerCase())) {
     await supabase.auth.signOut();
-    return { error: "This account does not have active staff access." };
+    return { error: "This account does not have staff portal access." };
   }
   redirect("/staff");
 }
@@ -31,47 +35,62 @@ export async function staffLogout() {
   redirect("/staff/login");
 }
 
-export async function saveStay(form: FormData) {
-  const { user } = await requireStaff();
-  const id = text(form, "id");
-  const row = {
-    owner_name: text(form, "owner_name"), owner_mobile: text(form, "owner_mobile"), owner_email: text(form, "owner_email") || null,
-    pet_name: text(form, "pet_name"), pet_type: text(form, "pet_type"), breed: text(form, "breed") || null,
-    check_in_at: text(form, "check_in_at"), check_out_at: text(form, "check_out_at"), room: text(form, "room") || null,
-    feeding_notes: text(form, "feeding_notes") || null, medication_notes: text(form, "medication_notes") || null,
-    emergency_contact: text(form, "emergency_contact") || null, vaccination_verified: form.get("vaccination_verified") === "on",
-    status: text(form, "status") || "reserved", updated_at: new Date().toISOString(), created_by: user.id,
-  };
-  if (!row.owner_name || !row.owner_mobile || !row.pet_name || !row.check_in_at || !row.check_out_at) throw new Error("Complete all required stay fields.");
+async function storeSignature(dataUrl: string, userId: string) {
+  const match = dataUrl.match(/^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/);
+  if (!match) throw new Error("The signature image is invalid.");
+  const bytes = Buffer.from(match[1], "base64");
+  if (!bytes.length || bytes.length > 2 * 1024 * 1024 || bytes[0] !== 0xff || bytes[1] !== 0xd8) throw new Error("The signature must be a JPEG under 2 MB.");
+  const path = `${userId}/${Date.now()}-${randomUUID()}.jpg`;
   const db = createAdminClient();
-  const { error } = id ? await db.from("pet_stays").update(row).eq("id", id) : await db.from("pet_stays").insert(row);
+  const { error } = await db.storage.from("staff-signatures").upload(path, bytes, { contentType: "image/jpeg", upsert: false });
   if (error) throw new Error(error.message);
-  revalidatePath("/staff"); revalidatePath("/staff/stays");
+  return { path, hash: createHash("sha256").update(bytes).digest("hex") };
 }
 
-export async function saveCareLog(form: FormData) {
+export async function saveRecord(form: FormData) {
   const { user } = await requireStaff();
-  const row = { stay_id: text(form, "stay_id"), care_type: text(form, "care_type"), notes: text(form, "notes"), completed_at: text(form, "completed_at") || new Date().toISOString(), created_by: user.id };
-  if (!row.stay_id || !row.care_type) throw new Error("Choose a pet and care activity.");
-  const { error } = await createAdminClient().from("care_logs").insert(row);
-  if (error) throw new Error(error.message);
-  revalidatePath("/staff"); revalidatePath("/staff/care");
-}
-
-export async function saveGroomingJob(form: FormData) {
-  const { user } = await requireStaff();
-  const id = text(form, "id");
-  const row = { owner_name: text(form, "owner_name"), owner_mobile: text(form, "owner_mobile"), pet_name: text(form, "pet_name"), pet_type: text(form, "pet_type"), service: text(form, "service"), appointment_at: text(form, "appointment_at"), status: text(form, "status") || "scheduled", notes: text(form, "notes") || null, updated_at: new Date().toISOString(), created_by: user.id };
-  if (!row.owner_name || !row.owner_mobile || !row.pet_name || !row.service || !row.appointment_at) throw new Error("Complete all required grooming fields.");
+  const type = text(form, "record_type");
+  if (type !== "agreement" && type !== "checklist") throw new Error("Invalid record type.");
+  const id = text(form, "record_id");
   const db = createAdminClient();
-  const { error } = id ? await db.from("grooming_jobs").update(row).eq("id", id) : await db.from("grooming_jobs").insert(row);
-  if (error) throw new Error(error.message);
-  revalidatePath("/staff"); revalidatePath("/staff/grooming");
+  const { data: existing } = id ? await db.from("staff_records").select("id,record_type,signature_path,signature_hash").eq("id", id).maybeSingle() : { data: null };
+  if (id && (!existing || existing.record_type !== type)) throw new Error("Record not found.");
+  const fields = type === "agreement" ? agreementFields : checklistFields;
+  const recordData: Record<string, unknown> = Object.fromEntries(fields.map((key) => [key, text(form, key)]));
+  if (!recordData.customer_name || !recordData.pet_name || !recordData.signer_name || !recordData.signed_date) throw new Error("Complete all required fields.");
+  if (type === "agreement") {
+    if (!recordData.phone) throw new Error("Phone number is required.");
+    recordData.services = form.getAll("services").map(String).filter((v) => ["Grooming","Pet Boarding","Pet Sitting","Others"].includes(v));
+  } else {
+    if (!recordData.checkin_date) throw new Error("Check-in date is required.");
+    recordData.daily_rows = Array.from({ length: 10 }, (_, i) => Object.fromEntries(dailyFields.map((key) => [key, text(form, `daily_${i}_${key}`)]))).filter((row) => Object.values(row).some(Boolean));
+  }
+  let signaturePath = existing?.signature_path || "";
+  let signatureHash = existing?.signature_hash || "";
+  const signatureData = text(form, "signature_data");
+  if (signatureData) {
+    const saved = await storeSignature(signatureData, user.id);
+    signaturePath = saved.path; signatureHash = saved.hash;
+  }
+  if (!signaturePath) throw new Error("A customer signature is required.");
+  const now = new Date().toISOString();
+  const row = { record_type: type, record_status: "completed", customer_name: String(recordData.customer_name), pet_name: String(recordData.pet_name), record_data: recordData, signature_path: signaturePath, signature_hash: signatureHash, updated_by: user.id, updated_at: now };
+  const result = existing
+    ? await db.from("staff_records").update(row).eq("id", id).select("id").single()
+    : await db.from("staff_records").insert({ ...row, created_by: user.id, created_at: now }).select("id").single();
+  if (result.error) throw new Error(result.error.message);
+  revalidatePath("/staff");
+  redirect(`/staff/records/${result.data.id}?message=saved`);
 }
 
-export async function updateEnquiry(form: FormData) {
+export async function deleteRecord(form: FormData) {
   await requireStaff();
-  const { error } = await createAdminClient().from("customer_enquiries").update({ status: text(form, "status"), staff_notes: text(form, "staff_notes"), updated_at: new Date().toISOString() }).eq("id", text(form, "id"));
+  const id = text(form, "record_id");
+  const db = createAdminClient();
+  const { data: record } = await db.from("staff_records").select("signature_path").eq("id", id).maybeSingle();
+  const { error } = await db.from("staff_records").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/staff"); revalidatePath("/staff/enquiries");
+  if (record?.signature_path) await db.storage.from("staff-signatures").remove([record.signature_path]);
+  revalidatePath("/staff");
+  redirect("/staff?message=deleted");
 }
