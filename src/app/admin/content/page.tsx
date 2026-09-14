@@ -2,6 +2,7 @@ import { createAdminClient } from "../../../lib/supabase/admin";
 import { requireAdmin } from "../../../lib/admin-auth";
 import { siteContentDefaults } from "../../../lib/site-content-defaults";
 import { homepageSections, mergeHomepageLayout } from "../../../lib/homepage-sections";
+import { imageSlots } from "../../../lib/image-slots";
 import AdminShell from "../admin-shell";
 import { deleteContent, saveContent } from "../crud-actions";
 import HomepageEditor from "./homepage-editor";
@@ -21,16 +22,18 @@ export default async function ContentPage() {
   const sections = [...new Set(rows.map((row) => row.section))];
   const layoutRow = (data || []).find((row) => row.content_key === "homepage.layout");
   const layout = mergeHomepageLayout(layoutRow?.value);
-  const { data: media = [] } = await createAdminClient().from("media_assets").select("slot_key,public_url").not("slot_key", "is", null);
-  const images = new Map((media || []).map((item) => [item.slot_key, item.public_url]));
+  const { data: media = [] } = await createAdminClient().from("media_assets").select("*").not("slot_key", "is", null);
+  const images = new Map((media || []).map((item) => [item.slot_key, item]));
+  const slotLabels = new Map<string, string>(imageSlots);
   const visualSections = homepageSections.map((section) => ({
     ...section,
     fields: rows.filter((item) => item.section === section.label || (section.key === "hotel" && item.section === "Hotel")),
-    previewImage: (section.imageSlot && images.get(section.imageSlot)) || section.fallbackImage,
+    images: (section.imageSlots || []).map((slotKey) => ({ slotKey, label: slotLabels.get(slotKey) || slotKey, asset: images.get(slotKey) || null })),
+    previewImage: (section.imageSlots?.[0] && images.get(section.imageSlots[0])?.public_url) || section.fallbackImage,
   }));
 
   return <AdminShell title="Website Content" email={user.email} active="/admin/content">
-    <div className={styles.notice}><strong>Visual homepage editor connected.</strong><span>Reorder, hide, preview and edit every homepage section from one screen.</span></div>
+    <div className={styles.notice}><strong>Visual homepage editor connected.</strong><span>Edit content and images, reorder or hide sections, and preview the homepage from one screen.</span></div>
     <HomepageEditor sections={visualSections} initialLayout={layout} />
     <details className={styles.advanced}>
       <summary>Advanced content fields</summary>
