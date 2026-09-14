@@ -2,9 +2,10 @@
 
 /* eslint-disable @next/next/no-img-element -- CMS thumbnails may use administrator-provided Supabase URLs. */
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { HomepageLayoutItem, HomepageSection } from "../../../lib/homepage-sections";
-import { deleteImage, saveContent, saveHomepageLayout, updateImage, uploadImage } from "../crud-actions";
+import { deleteImage, saveHomepageLayout, updateImage, uploadImage } from "../crud-actions";
 import styles from "../admin.module.css";
 
 type ContentRow = {
@@ -21,6 +22,50 @@ type ContentRow = {
 type MediaAsset = { id: string; name: string; alt_text: string; public_url: string; storage_path: string; slot_key: string };
 type SectionImage = { slotKey: string; label: string; asset: MediaAsset | null };
 type EditorSection = HomepageSection & { fields: ContentRow[]; images: SectionImage[]; previewImage: string };
+
+function ContentFieldForm({ item }: { item: ContentRow }) {
+  const router = useRouter();
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStatus("saving");
+    setMessage("");
+    const form = new FormData(event.currentTarget);
+    const response = await fetch("/api/admin/content", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: item.id,
+        content_key: item.content_key,
+        label: item.label,
+        section: item.section,
+        value: String(form.get("value") || ""),
+        content_type: item.content_type,
+        sort_order: item.sort_order,
+        published: true,
+      }),
+    });
+    const result = await response.json().catch(() => ({ error: "The server returned an invalid response." }));
+    if (!response.ok) {
+      setStatus("error");
+      setMessage(result.error || "The content could not be saved.");
+      return;
+    }
+    setStatus("saved");
+    setMessage("Saved successfully.");
+    router.refresh();
+  };
+
+  return <form onSubmit={submit} className={styles.inlineField}>
+    <label>{item.label}{item.content_type === "textarea"
+      ? <textarea name="value" defaultValue={item.value} required />
+      : <input name="value" type={item.content_type === "phone" ? "tel" : item.content_type} defaultValue={item.value} required />}</label>
+    <button type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving…" : "Save"}</button>
+    {message && <span role="status" className={status === "error" ? styles.saveError : styles.saveSuccess}>{message}</span>}
+  </form>;
+}
 
 export default function HomepageEditor({ sections, initialLayout }: { sections: EditorSection[]; initialLayout: HomepageLayoutItem[] }) {
   const sectionMap = new Map(sections.map((section) => [section.key, section]));
@@ -117,19 +162,7 @@ export default function HomepageEditor({ sections, initialLayout }: { sections: 
                   </form>
                 </article>)}</div>
               </div>}
-              {section.fields.length ? <div className={styles.sectionFields}>{section.fields.map((item) => <form action={saveContent} className={styles.inlineField} key={item.content_key}>
-                {item.id && <input type="hidden" name="id" value={item.id} />}
-                <input type="hidden" name="content_key" value={item.content_key} />
-                <input type="hidden" name="section" value={item.section} />
-                <input type="hidden" name="content_type" value={item.content_type} />
-                <input type="hidden" name="sort_order" value={item.sort_order} />
-                <input type="hidden" name="published" value="on" />
-                <input type="hidden" name="label" value={item.label} />
-                <label>{item.label}{item.content_type === "textarea"
-                  ? <textarea name="value" defaultValue={item.value} required />
-                  : <input name="value" type={item.content_type === "phone" ? "tel" : item.content_type} defaultValue={item.value} required />}</label>
-                <button type="submit">Save</button>
-              </form>)}</div> : <p className={styles.muted}>This section currently uses fixed design copy. Its position and visibility can still be changed.</p>}
+              {section.fields.length ? <div className={styles.sectionFields}>{section.fields.map((item) => <ContentFieldForm item={item} key={item.content_key} />)}</div> : <p className={styles.muted}>This section currently uses fixed design copy. Its position and visibility can still be changed.</p>}
               <button className={styles.previewJump} type="button" onClick={() => sendPreview(layout, section.key)}>Show this section in preview</button>
             </div>}
           </article>;
