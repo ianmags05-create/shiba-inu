@@ -6,7 +6,7 @@ export async function GET() {
   const db=createAdminClient();
   const [contentResult,menuResult,imageResult]=await Promise.all([
     db.from("site_content").select("content_key,value").eq("published",true).order("sort_order"),
-    db.from("menu_items").select("label,url").eq("visible",true).order("sort_order"),
+    db.from("menu_items").select("id,label,url,parent_id").eq("visible",true).order("sort_order"),
     db.from("media_assets").select("slot_key,public_url,alt_text").not("slot_key","is",null)
   ]);
   const contentRows=contentResult.data||[];
