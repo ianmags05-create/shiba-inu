@@ -42,8 +42,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "The content could not be saved.";
+    const details = error && typeof error === "object" ? error as Record<string, unknown> : {};
+    const parts = [details.message, details.details, details.hint]
+      .filter((value): value is string => typeof value === "string" && value.length > 0);
+    const code = typeof details.code === "string" ? ` (${details.code})` : "";
+    const message = error instanceof Error ? error.message : parts.join(" — ") || "The content could not be saved.";
     console.error("Content API save failed:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: `${message}${code}` }, { status: 500 });
   }
 }
