@@ -1,0 +1,11 @@
+"use client";
+import Link from "next/link";
+import { useState } from "react";
+import { deleteRecord } from "./actions";
+import styles from "./staff.module.css";
+type Row={id:number;record_type:string;customer_name:string;pet_name:string;updated_at:string;updated_by:string;staff:string};
+export default function RecordsTable({records}:{records:Row[]}){
+  const [selected,setSelected]=useState<number[]>([]); const [format,setFormat]=useState("pdf");
+  const download=()=>{if(!selected.length){alert("Select at least one record to download.");return;} window.location.href=`/staff/export?format=${format}&ids=${selected.join(",")}`;};
+  return <><div className={styles.bulk}><select value={format} onChange={e=>setFormat(e.target.value)}><option value="pdf">PDF</option><option value="docx">DOCX</option></select><button type="button" className={styles.btn} onClick={download}>Download Selected</button></div><div className={styles.tableWrap}><table className={styles.records}><thead><tr><th><input type="checkbox" aria-label="Select all records" checked={records.length>0&&selected.length===records.length} onChange={e=>setSelected(e.target.checked?records.map(r=>r.id):[])}/></th><th>ID</th><th>Type</th><th>Customer</th><th>Pet</th><th>Updated</th><th>Staff</th><th>Actions</th></tr></thead><tbody>{records.map(r=><tr key={r.id}><td><input type="checkbox" checked={selected.includes(r.id)} onChange={e=>setSelected(e.target.checked?[...selected,r.id]:selected.filter(id=>id!==r.id))}/></td><td>#{r.id}</td><td>{r.record_type==="agreement"?"Confidentiality Agreement":"Daily Checklist"}</td><td>{r.customer_name||"—"}</td><td>{r.pet_name||"—"}</td><td>{new Date(r.updated_at).toLocaleString("en",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"})}</td><td>{r.staff}</td><td className={styles.rowActions}><Link href={`/staff/records/${r.id}`}>View</Link><Link href={`/staff/${r.record_type}/${r.id}`}>Edit</Link><form className={styles.dangerForm} action={deleteRecord} onSubmit={e=>{if(!confirm("Delete this record permanently?"))e.preventDefault();}}><input type="hidden" name="record_id" value={r.id}/><button className={styles.delete}>Delete</button></form></td></tr>)}{!records.length&&<tr><td className={styles.empty} colSpan={8}>No records found.</td></tr>}</tbody></table></div></>;
+}
