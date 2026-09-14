@@ -17,16 +17,7 @@ export default async function AdminLogin() {
   return (
     <main className={styles.shell}>
       <section className={styles.card} aria-labelledby="admin-login-title">
-        <div className={styles.brand}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/uploads/shiba-inu-logo.jpg" alt="Shiba Inu Pet Shop" />
-          <div><strong>Shiba Inu</strong><span>Admin Portal</span></div>
-        </div>
-        <div className={styles.copy}>
-          <p className={styles.eyebrow}>Authorized staff only</p>
-          <h1 id="admin-login-title">Welcome back</h1>
-          <p>Sign in to manage the website, reservations, customers, and documents.</p>
-        </div>
+        <div className={styles.brand}><span className={styles.paw}>🐾</span><span className={styles.eyebrow}>Shiba Inu Pet Shop</span><h1 id="admin-login-title">Admin Portal</h1><p>Sign in to manage website content, navigation, images, and staff access.</p></div>
         <LoginForm configured={configured} />
         <p className={styles.security}>Protected by encrypted HTTPS sessions. Your password is never stored in this website&apos;s code.</p>
       </section>
