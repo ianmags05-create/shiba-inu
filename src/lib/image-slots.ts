@@ -9,3 +9,24 @@ export const imageSlots = [
   ["gallery.image_7", "Gallery — image 7"], ["gallery.image_8", "Gallery — image 8"],
   ["story.kumi_image", "Our story — Kumi"], ["team.banner_image", "Team — banner"],
 ] as const;
+
+export const imageSlotDefaults: Record<string, string> = {
+  "hero.image": "/assets/photos/shiba-smile.webp",
+  "services.hotel_image": "/assets/photos/hotel-rooms.webp",
+  "services.puppies_image": "/assets/photos/shiba-sit.webp",
+  "services.grooming_image": "/assets/photos/grooming-area.webp",
+  "services.shop_image": "/assets/photos/store-interior.webp",
+  "hotel.dogs_image": "/assets/photos/hotel-rooms-3.webp",
+  "hotel.cats_image": "/assets/photos/hotel-rooms-2.webp",
+  "hotel.wash_image": "/assets/photos/grooming-station.webp",
+  "gallery.featured": "/assets/photos/storefront.webp",
+  "gallery.image_2": "/assets/photos/team-inside.webp",
+  "gallery.image_3": "/assets/photos/hotel-rooms.webp",
+  "gallery.image_4": "/assets/photos/grooming-area.webp",
+  "gallery.image_5": "/assets/photos/food-aisle.webp",
+  "gallery.image_6": "/assets/photos/reception-cctv.webp",
+  "gallery.image_7": "/assets/photos/shiba-aisle.webp",
+  "gallery.image_8": "/assets/photos/carriers.webp",
+  "story.kumi_image": "/assets/photos/shiba-kumi.webp",
+  "team.banner_image": "/assets/photos/team-group.webp",
+};
