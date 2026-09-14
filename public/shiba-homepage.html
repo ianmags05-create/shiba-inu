@@ -705,7 +705,15 @@ fetch('/api/site-data',{cache:'no-store'}).then(function(r){return r.ok?r.json()
   applyHomepageLayout(data.layout);
   Object.keys(data.content||{}).forEach(function(key){document.querySelectorAll('[data-content-key="'+key+'"]') .forEach(function(el){el.textContent=data.content[key]})});
   var menu=document.querySelector('[data-dynamic-menu]');
-  if(menu&&data.menu&&data.menu.length){menu.innerHTML='';data.menu.forEach(function(item){if(!item.url||!/^(#|\/|https:\/\/)/.test(item.url))return;var a=document.createElement('a');a.textContent=item.label;a.href=item.url;if(item.url==='#book')a.className='btn btn-primary btn-sm';menu.appendChild(a)})}
+  if(menu&&data.menu&&data.menu.length){
+    menu.innerHTML='';var valid=function(item){return item&&item.url&&/^(#|\/|https:\/\/)/.test(item.url)};
+    data.menu.filter(function(item){return !item.parent_id&&valid(item)}).forEach(function(item,index){
+      var children=data.menu.filter(function(child){return child.parent_id===item.id&&valid(child)});
+      if(children.length){var wrap=document.createElement('div'),button=document.createElement('button'),sub=document.createElement('div'),subId='dynamic-submenu-'+index;wrap.className='nav-item';button.className='services-toggle';button.type='button';button.textContent=item.label+' ';button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls',subId);button.insertAdjacentHTML('beforeend','<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 5 5 5-5"/></svg>');sub.className='submenu';sub.id=subId;children.forEach(function(child){var link=document.createElement('a');link.textContent=child.label;link.href=child.url;sub.appendChild(link)});button.addEventListener('click',function(){var open=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!open));sub.classList.toggle('is-open',!open)});wrap.appendChild(button);wrap.appendChild(sub);menu.appendChild(wrap)
+      }else{var a=document.createElement('a');a.textContent=item.label;a.href=item.url;if(item.url==='#book')a.className='btn btn-primary btn-sm';menu.appendChild(a)}
+    });
+    menu.querySelectorAll('a').forEach(function(link){link.addEventListener('click',function(){menuToggle&&menuToggle.setAttribute('aria-expanded','false');menu.classList.remove('is-open')})});
+  }
   Object.keys(data.images||{}).forEach(function(key){var image=data.images[key];document.querySelectorAll('[data-image-slot="'+key+'"]').forEach(function(el){if(/^https:\/\//.test(image.url)){el.src=image.url;el.alt=image.alt||el.alt}})});
 }).catch(function(){/* Static defaults remain visible if the CMS is unavailable. */});
 })();
