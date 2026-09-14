@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient, isAdminEmail, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, isAdminEmail, isSupabaseConfigured } from "../../../lib/supabase/server";
 import LoginForm from "./login-form";
 import styles from "./login.module.css";
 
