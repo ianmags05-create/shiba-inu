@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { HomepageLayoutItem, HomepageSection } from "../../../lib/homepage-sections";
-import { saveContent, saveHomepageLayout } from "../crud-actions";
+import { deleteImage, saveContent, saveHomepageLayout, updateImage, uploadImage } from "../crud-actions";
 import styles from "../admin.module.css";
 
 type ContentRow = {
@@ -18,7 +18,9 @@ type ContentRow = {
   published: boolean;
 };
 
-type EditorSection = HomepageSection & { fields: ContentRow[]; previewImage: string };
+type MediaAsset = { id: string; name: string; alt_text: string; public_url: string; storage_path: string; slot_key: string };
+type SectionImage = { slotKey: string; label: string; asset: MediaAsset | null };
+type EditorSection = HomepageSection & { fields: ContentRow[]; images: SectionImage[]; previewImage: string };
 
 export default function HomepageEditor({ sections, initialLayout }: { sections: EditorSection[]; initialLayout: HomepageLayoutItem[] }) {
   const sectionMap = new Map(sections.map((section) => [section.key, section]));
@@ -92,6 +94,29 @@ export default function HomepageEditor({ sections, initialLayout }: { sections: 
               </label>
             </div>
             {isOpen && <div className={styles.sectionCardBody}>
+              {section.images.length > 0 && <div className={styles.sectionImageEditor}>
+                <h3>Section images</h3>
+                <div className={styles.sectionImageGrid}>{section.images.map((image) => image.asset ? <article className={styles.sectionImageCard} key={image.slotKey}>
+                  <img src={image.asset.public_url} alt={image.asset.alt_text} />
+                  <form action={updateImage}>
+                    <input type="hidden" name="id" value={image.asset.id} />
+                    <input type="hidden" name="slot_key" value={image.slotKey} />
+                    <label>{image.label}<input name="name" defaultValue={image.asset.name} required /></label>
+                    <label>Alternative text<input name="alt_text" defaultValue={image.asset.alt_text} required /></label>
+                    <label>Replace image (optional)<input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" /></label>
+                    <div><button type="submit">Save image</button><button className={styles.danger} type="submit" formAction={deleteImage}>Delete</button></div>
+                  </form>
+                </article> : <article className={`${styles.sectionImageCard} ${styles.emptyImageCard}`} key={image.slotKey}>
+                  <div className={styles.imagePlaceholder}>No custom image</div>
+                  <form action={uploadImage}>
+                    <input type="hidden" name="slot_key" value={image.slotKey} />
+                    <label>{image.label}<input name="name" defaultValue={image.label} required /></label>
+                    <label>Alternative text<input name="alt_text" required /></label>
+                    <label>Image (maximum 5 MB)<input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required /></label>
+                    <button type="submit">Upload image</button>
+                  </form>
+                </article>)}</div>
+              </div>}
               {section.fields.length ? <div className={styles.sectionFields}>{section.fields.map((item) => <form action={saveContent} className={styles.inlineField} key={item.content_key}>
                 {item.id && <input type="hidden" name="id" value={item.id} />}
                 <input type="hidden" name="content_key" value={item.content_key} />
