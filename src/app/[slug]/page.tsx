@@ -8,13 +8,21 @@ import styles from "./page.module.css";
 export const dynamic = "force-dynamic";
 
 async function getPage(slug: string) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) return null;
   const { data = [] } = await createAdminClient().from("site_content").select("content_key,value,published,updated_at").like("content_key", `page.${slug}.%`).eq("published", true);
   return pageFromRows(slug, data || []);
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params; const page = await getPage(slug);
-  return page ? { title: `${page.title} | Shiba Inu Pet Shop`, description: page.metaDescription } : {};
+  if (!page) return { robots: { index: false, follow: false } };
+  const description = page.metaDescription || `${page.title} from Shiba Inu Pet Shop & Hotel in Buhangin, Davao City.`;
+  return {
+    title: page.title,
+    description,
+    alternates: { canonical: `/${page.slug}` },
+    openGraph: { title: page.title, description, url: `/${page.slug}` },
+  };
 }
 
 export default async function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
