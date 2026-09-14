@@ -6,7 +6,6 @@ const items = [
   ["Overview", "/admin", "◉"],
   ["Website Content", "/admin/content", "▤"],
   ["Menus", "/admin/menus", "☰"],
-  ["Images", "/admin/images", "▧"],
   ["Staff Users", "/admin/users", "♙"],
   ["Staff Portal", "/staff", "↗"],
 ];
