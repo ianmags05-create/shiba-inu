@@ -576,7 +576,43 @@
 .sectionImageCard button { min-height: 39px; padding: 7px 11px; border: 1px solid var(--green2); border-radius: 7px; background: var(--green2); color: #fff; font-weight: 750; cursor: pointer; }
 .sectionImageCard .danger { border-color: #bc473f; background: #fff; color: #a53630; }
 .emptyImageCard { border-style: dashed; }
+.currentImage { position: relative; height: 150px; overflow: hidden; background: #e9e2d8; }
+.currentImage img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.currentImage span { position: absolute; left: 8px; bottom: 8px; padding: 4px 7px; border-radius: 5px; background: rgba(18,63,61,.9); color: #fff; font-size: 10px; font-weight: 800; }
+.pageActions { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+.pageActions .primary { text-decoration: none; }
+.pagesTable { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: 0 12px 35px rgba(18,63,61,.07); }
+.pageRow { display: grid; grid-template-columns: minmax(0,1fr) 105px 110px; align-items: center; gap: 18px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+.pageRow:last-child { border-bottom: 0; }
+.pageRow > div { display: grid; }
+.pageRow strong { color: var(--green); font-size: 16px; }
+.pageRow div span { color: var(--muted); font-size: 12px; }
+.pageRow > a { color: var(--green2); font-weight: 750; }
+.statusPublished, .statusDraft { width: fit-content; padding: 4px 8px; border-radius: 99px; font-size: 11px; font-weight: 800; }
+.statusPublished { background: #e3f5ef; color: #176d67; }
+.statusDraft { background: #eee8df; color: #796f64; }
+.pageEditor { display: grid; grid-template-columns: minmax(0,1fr) 240px; gap: 18px; align-items: start; }
+.pageEditorMain, .publishCard { display: grid; gap: 16px; padding: 20px; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: 0 12px 35px rgba(18,63,61,.07); }
+.pageEditor label, .fieldLabel { display: grid; gap: 6px; color: #594f44; font-size: 12px; font-weight: 800; }
+.pageEditor input, .pageEditor textarea { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #dfd5c7; border-radius: 8px; color: var(--text); font: inherit; }
+.pageEditor textarea { min-height: 90px; resize: vertical; }
+.slugField { display: flex; align-items: center; overflow: hidden; border: 1px solid #dfd5c7; border-radius: 8px; }
+.slugField span { padding-left: 12px; color: var(--muted); }
+.slugField input { border: 0; }
+.richToolbar { display: flex; flex-wrap: wrap; gap: 5px; padding: 7px; border: 1px solid #dfd5c7; border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--pale); }
+.richToolbar button { min-height: 32px; padding: 5px 9px; border: 1px solid #dfd5c7; border-radius: 5px; background: #fff; color: var(--green); cursor: pointer; }
+.richEditor { min-height: 330px; padding: 16px; border: 1px solid #dfd5c7; border-radius: 0 0 8px 8px; background: #fff; outline: none; }
+.richEditor:focus { border-color: var(--aqua); box-shadow: 0 0 0 2px rgba(21,151,146,.12); }
+.publishCard { position: sticky; top: 14px; }
+.publishCard h3 { margin: 0; color: var(--green); }
+.publishCard > span { min-height: 22px; color: var(--green2); font-size: 12px; font-weight: 750; }
+.textDanger { border: 0; background: transparent; color: #a53630; text-decoration: underline; cursor: pointer; }
 @media (max-width: 700px) {
   .sectionImageGrid { grid-template-columns: 1fr; }
-  .sectionImageCard > img, .imagePlaceholder { height: 190px; }
+  .sectionImageCard > img, .imagePlaceholder, .currentImage { height: 190px; }
+  .pageRow { grid-template-columns: minmax(0,1fr) auto; gap: 8px; padding: 14px; }
+  .pageRow > a { grid-column: 1/-1; }
+  .pageEditor { grid-template-columns: 1fr; }
+  .publishCard { position: static; }
+  .richEditor { min-height: 260px; }
 }
