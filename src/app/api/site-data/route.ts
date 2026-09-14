@@ -1,11 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+import { createAdminClient } from "../../../lib/supabase/admin";
 import { mergeHomepageLayout } from "../../../lib/homepage-sections";
 
 export const dynamic = "force-dynamic";
 export async function GET() {
-  const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if(!url||!key)return Response.json({content:{},menu:[],images:{}},{headers:{"Cache-Control":"no-store"}});
-  const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+  const db=createAdminClient();
   const [contentResult,menuResult,imageResult]=await Promise.all([
     db.from("site_content").select("content_key,value").eq("published",true).order("sort_order"),
     db.from("menu_items").select("label,url").eq("visible",true).order("sort_order"),
