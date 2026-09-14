@@ -1,8 +1,10 @@
 import { createAdminClient } from "../../../lib/supabase/admin";
 import { requireAdmin } from "../../../lib/admin-auth";
 import { siteContentDefaults } from "../../../lib/site-content-defaults";
+import { homepageSections, mergeHomepageLayout } from "../../../lib/homepage-sections";
 import AdminShell from "../admin-shell";
 import { deleteContent, saveContent } from "../crud-actions";
+import HomepageEditor from "./homepage-editor";
 import styles from "../admin.module.css";
 
 export const dynamic = "force-dynamic";
@@ -14,14 +16,26 @@ export default async function ContentPage() {
   const { data = [] } = await createAdminClient().from("site_content").select("*").order("sort_order");
   const saved = new Map((data || []).map((row) => [row.content_key, row]));
   const registered = siteContentDefaults.map((item) => ({ ...item, published: true, ...saved.get(item.content_key) })) as ContentRow[];
-  const custom = (data || []).filter((row) => !siteContentDefaults.some((item) => item.content_key === row.content_key)) as ContentRow[];
+  const custom = (data || []).filter((row) => row.content_key !== "homepage.layout" && !siteContentDefaults.some((item) => item.content_key === row.content_key)) as ContentRow[];
   const rows = [...registered, ...custom];
   const sections = [...new Set(rows.map((row) => row.section))];
+  const layoutRow = (data || []).find((row) => row.content_key === "homepage.layout");
+  const layout = mergeHomepageLayout(layoutRow?.value);
+  const { data: media = [] } = await createAdminClient().from("media_assets").select("slot_key,public_url").not("slot_key", "is", null);
+  const images = new Map((media || []).map((item) => [item.slot_key, item.public_url]));
+  const visualSections = homepageSections.map((section) => ({
+    ...section,
+    fields: rows.filter((item) => item.section === section.label || (section.key === "hotel" && item.section === "Hotel")),
+    previewImage: (section.imageSlot && images.get(section.imageSlot)) || section.fallbackImage,
+  }));
 
   return <AdminShell title="Website Content" email={user.email} active="/admin/content">
-    <div className={styles.notice}><strong>Homepage connected.</strong><span>Every field below is mapped to the public page. Saving a default field creates it automatically.</span></div>
-    <div className={styles.toolbar}><p>Edit headings, descriptions, prices and contact details by section.</p></div>
-    {sections.map((section) => <section className={styles.contentSection} key={section}>
+    <div className={styles.notice}><strong>Visual homepage editor connected.</strong><span>Reorder, hide, preview and edit every homepage section from one screen.</span></div>
+    <HomepageEditor sections={visualSections} initialLayout={layout} />
+    <details className={styles.advanced}>
+      <summary>Advanced content fields</summary>
+      <div className={styles.toolbar}><p>Edit fields not assigned to a visual homepage section.</p></div>
+    {sections.filter((section) => !homepageSections.some((item) => item.label === section) && section !== "Contact").map((section) => <section className={styles.contentSection} key={section}>
       <h2>{section}</h2>
       <div className={styles.grid}>{rows.filter((item) => item.section === section).map((item) => <article className={styles.row} key={item.content_key}>
         <form action={saveContent}>
@@ -42,8 +56,7 @@ export default async function ContentPage() {
         </form>
       </article>)}</div>
     </section>)}
-    <details className={styles.advanced}>
-      <summary>Add an advanced custom content field</summary>
+      <h3>Add a custom content field</h3>
       <section className={styles.formCard}><form action={saveContent}>
         <label>Key<input name="content_key" placeholder="section.field" required /></label>
         <label>Label<input name="label" required /></label>
