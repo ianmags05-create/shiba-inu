@@ -94,3 +94,10 @@ export async function deleteRecord(form: FormData) {
   revalidatePath("/staff");
   redirect("/staff?message=deleted");
 }
+
+// Compatibility actions for legacy portal pages that may still be present in
+// an older Hostinger checkout. New records are managed through staff_records.
+export async function saveStay(_form: FormData) { await requireStaff(); redirect("/staff"); }
+export async function saveCareLog(_form: FormData) { await requireStaff(); redirect("/staff"); }
+export async function saveGroomingJob(_form: FormData) { await requireStaff(); redirect("/staff"); }
+export async function updateEnquiry(_form: FormData) { await requireStaff(); redirect("/staff"); }
